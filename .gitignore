@@ -26,6 +26,17 @@ htmlcov/
 # Sphinx docs
 docs/_build/
 
+# Build artifacts
+.buildozer/
+.kivy-ios/
+*.apk
+*.ipa
+*.app
+*.spec.bak
+
+# PyInstaller
+*.manifest
+
 # OS
 .DS_Store
 Thumbs.db

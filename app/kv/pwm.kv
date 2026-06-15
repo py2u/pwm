@@ -1,0 +1,588 @@
+#:kivy 2.0
+
+# ── Common styles ───────────────────────────────────────────────────────
+<Label>:
+    color: root.get("c_text", (0.92, 0.93, 0.95, 1)) if hasattr(root, 'get') else (0.92, 0.93, 0.95, 1)
+
+<CustomButton@Button>:
+    size_hint: 1, None
+    height: 48
+    background_normal: ""
+    background_color: 0.10, 0.45, 0.91, 1
+    color: 1, 1, 1, 1
+    font_size: 15
+
+<DangerButton@Button>:
+    size_hint: 1, None
+    height: 48
+    background_normal: ""
+    background_color: 0.85, 0.15, 0.15, 1
+    color: 1, 1, 1, 1
+    font_size: 15
+
+<HeaderLabel@Label>:
+    font_size: 22
+    bold: True
+    size_hint: 1, None
+    height: 40
+
+# ── Unlock Screen ────────────────────────────────────────────────────────
+<UnlockScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 30
+        spacing: 20
+        canvas.before:
+            Color:
+                rgba: 0.05, 0.08, 0.15, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "\\U0001F512  PWM"
+            font_size: 32
+            bold: True
+            size_hint: 1, None
+            height: 60
+
+        Label:
+            id: status_label
+            text: root.status_text
+            font_size: 14
+            opacity: 0.7
+
+        TextInput:
+            id: password_input
+            password: True
+            multiline: False
+            hint_text: "Master password"
+            size_hint: 1, None
+            height: 50
+            font_size: 16
+            on_text_validate: root.do_action()
+
+        CustomButton:
+            text: "Unlock" if root.mode == "unlock" else "Create Vault"
+            on_release: root.do_action()
+
+        Button:
+            text: "Switch to Create Mode" if root.mode == "unlock" else "Switch to Unlock Mode"
+            size_hint: 1, None
+            height: 40
+            background_normal: ""
+            background_color: 0, 0, 0, 0
+            color: 0.55, 0.58, 0.65, 1
+            font_size: 12
+            on_release: root.toggle_mode()
+
+# ── Vault Screen ─────────────────────────────────────────────────────────
+<VaultScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 15
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: 0.05, 0.08, 0.15, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            size_hint: 1, None
+            height: 50
+            spacing: 10
+            TextInput:
+                hint_text: "Search accounts..."
+                multiline: False
+                size_hint: 1, None
+                height: 44
+                on_text: root.on_search(self.text)
+            Button:
+                text: "+"
+                size_hint: None, None
+                width: 50
+                height: 44
+                font_size: 24
+                background_normal: ""
+                background_color: 0.10, 0.45, 0.91, 1
+                on_release: root.add_account()
+
+        RecycleView:
+            id: account_list
+            viewclass: "AccountCard"
+            data: [{"index": i, "service": a.service, "username": a.username, "category": a.category or ""} for i, a in enumerate(root.filtered_accounts)]
+            RecycleBoxLayout:
+                default_size: None, 60
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: "vertical"
+
+        BoxLayout:
+            size_hint: 1, None
+            height: 50
+            spacing: 8
+            CustomButton:
+                text: "\\U0001F5B1  Generator"
+                on_release: root.open_generator()
+            CustomButton:
+                text: "\\u26D4 Lock"
+                background_color: 0.85, 0.15, 0.15, 1
+                on_release: root.lock_vault()
+
+<AccountCard>:
+    size_hint: 1, None
+    height: 60
+    canvas.before:
+        Color:
+            rgba: 0.10, 0.14, 0.22, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        padding: 12, 8
+        BoxLayout:
+            orientation: "vertical"
+            size_hint: 0.7, 1
+            Label:
+                text: root.service
+                font_size: 16
+                bold: True
+                halign: "left"
+                text_size: self.size
+            Label:
+                text: root.username
+                font_size: 12
+                color: 0.55, 0.58, 0.65, 1
+                halign: "left"
+                text_size: self.size
+        Label:
+            text: root.category
+            font_size: 11
+            color: 0.55, 0.58, 0.65, 1
+            halign: "right"
+            valign: "middle"
+
+# ── Detail Screen ────────────────────────────────────────────────────────
+<DetailScreen>:
+    ScrollView:
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 15
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            canvas.before:
+                Color:
+                    rgba: 0.05, 0.08, 0.15, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            HeaderLabel:
+                id: service_label
+                text: ""
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 50
+                Label:
+                    text: "Username:"
+                    size_hint: 0.35, 1
+                    bold: True
+                Label:
+                    id: username_label
+                    text: ""
+                    size_hint: 0.45, 1
+                CustomButton:
+                    text: "Copy"
+                    size_hint: 0.2, 1
+                    height: 36
+                    on_release: root.copy_username()
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 50
+                Label:
+                    text: "Password:"
+                    size_hint: 0.35, 1
+                    bold: True
+                Label:
+                    id: password_label
+                    text: "********"
+                    size_hint: 0.45, 1
+                CustomButton:
+                    text: "Copy"
+                    size_hint: 0.2, 1
+                    height: 36
+                    on_release: root.copy_password()
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 30
+                Label:
+                    text: "Category:"
+                    size_hint: 0.35, 1
+                    bold: True
+                Label:
+                    id: category_label
+                    text: ""
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 30
+                Label:
+                    text: "Notes:"
+                    size_hint: 0.35, 1
+                    bold: True
+                Label:
+                    id: notes_label
+                    text: ""
+
+            Widget:
+                size_hint: 1, None
+                height: 15
+
+            CustomButton:
+                text: "\\U0001F310  Open Website"
+                on_release: root.open_url()
+            CustomButton:
+                text: "\\u270F  Edit"
+                height: 44
+                on_release: root.edit_account()
+            DangerButton:
+                text: "\\U0001F5D1  Delete"
+                on_release: root.delete_account()
+            Button:
+                text: "\\u2190  Back"
+                size_hint: 1, None
+                height: 44
+                background_normal: ""
+                background_color: 0, 0, 0, 0
+                color: 0.55, 0.58, 0.65, 1
+                on_release: setattr(root.manager, 'current', 'vault')
+
+# ── Add / Edit Screen ────────────────────────────────────────────────────
+<AddEditScreen>:
+    ScrollView:
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 12
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            canvas.before:
+                Color:
+                    rgba: 0.05, 0.08, 0.15, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            HeaderLabel:
+                text: "Edit Account" if root.is_edit else "New Account"
+
+            Label:
+                text: "Service"
+                size_hint: 1, None
+                height: 20
+                font_size: 12
+                bold: True
+            TextInput:
+                id: service_input
+                hint_text: "e.g., github.com"
+                multiline: False
+                size_hint: 1, None
+                height: 44
+
+            Label:
+                text: "Username / Email"
+                size_hint: 1, None
+                height: 20
+                font_size: 12
+                bold: True
+            TextInput:
+                id: username_input
+                hint_text: "user@example.com"
+                multiline: False
+                size_hint: 1, None
+                height: 44
+
+            Label:
+                text: "Password"
+                size_hint: 1, None
+                height: 20
+                font_size: 12
+                bold: True
+            BoxLayout:
+                size_hint: 1, None
+                height: 44
+                spacing: 8
+                TextInput:
+                    id: password_input
+                    hint_text: "Enter or generate"
+                    multiline: False
+                    size_hint: 0.7, 1
+                Button:
+                    text: "\\u267B"
+                    size_hint: 0.3, 1
+                    background_normal: ""
+                    background_color: 0.10, 0.45, 0.91, 1
+                    font_size: 14
+                    on_release: root.generate_password()
+
+            Label:
+                text: "Category"
+                size_hint: 1, None
+                height: 20
+                font_size: 12
+                bold: True
+            TextInput:
+                id: category_input
+                hint_text: "Work / Personal / ..."
+                multiline: False
+                size_hint: 1, None
+                height: 44
+
+            Label:
+                text: "Notes"
+                size_hint: 1, None
+                height: 20
+                font_size: 12
+                bold: True
+            TextInput:
+                id: notes_input
+                hint_text: "Optional notes..."
+                multiline: True
+                size_hint: 1, None
+                height: 80
+
+            Widget:
+                size_hint: 1, None
+                height: 10
+
+            CustomButton:
+                text: "\\u2705  Save"
+                on_release: root.save()
+            Button:
+                text: "Cancel"
+                size_hint: 1, None
+                height: 44
+                background_normal: ""
+                background_color: 0, 0, 0, 0
+                color: 0.55, 0.58, 0.65, 1
+                on_release: setattr(root.manager, 'current', 'vault')
+
+# ── Generator Screen ─────────────────────────────────────────────────────
+<GeneratorScreen>:
+    ScrollView:
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 12
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            canvas.before:
+                Color:
+                    rgba: 0.05, 0.08, 0.15, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            HeaderLabel:
+                text: "\\U0001F5B1  Password Generator"
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 44
+                spacing: 10
+                Label:
+                    text: "Length:"
+                    size_hint: 0.3, 1
+                TextInput:
+                    id: len_input
+                    text: root.length
+                    input_filter: "int"
+                    multiline: False
+                    size_hint: 0.3, 1
+                    on_text: setattr(root, 'length', self.text)
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 36
+                Label:
+                    text: "A-Z"
+                    size_hint: 0.5, 1
+                Switch:
+                    id: upper_toggle
+                    active: True
+                    size_hint: 0.5, 1
+            BoxLayout:
+                size_hint: 1, None
+                height: 36
+                Label:
+                    text: "a-z"
+                    size_hint: 0.5, 1
+                Switch:
+                    id: lower_toggle
+                    active: True
+                    size_hint: 0.5, 1
+            BoxLayout:
+                size_hint: 1, None
+                height: 36
+                Label:
+                    text: "0-9"
+                    size_hint: 0.5, 1
+                Switch:
+                    id: digits_toggle
+                    active: True
+                    size_hint: 0.5, 1
+            BoxLayout:
+                size_hint: 1, None
+                height: 36
+                Label:
+                    text: "!@#$"
+                    size_hint: 0.5, 1
+                Switch:
+                    id: symbols_toggle
+                    active: True
+                    size_hint: 0.5, 1
+            BoxLayout:
+                size_hint: 1, None
+                height: 36
+                Label:
+                    text: "Easy-read"
+                    size_hint: 0.5, 1
+                Switch:
+                    id: easy_toggle
+                    active: False
+                    size_hint: 0.5, 1
+
+            CustomButton:
+                text: "\\U0001F3B2  Generate"
+                on_release: root.generate()
+
+            TextInput:
+                text: root.password
+                readonly: True
+                size_hint: 1, None
+                height: 50
+                font_size: 18
+                halign: "center"
+
+            Label:
+                text: root.strength_text
+                size_hint: 1, None
+                height: 30
+                font_size: 11
+
+            BoxLayout:
+                size_hint: 1, None
+                height: 44
+                spacing: 8
+                CustomButton:
+                    text: "Copy"
+                    on_release: root.copy_password()
+                CustomButton:
+                    text: "Use in Add"
+                    on_release: root.use_in_add()
+
+            Button:
+                text: "Back"
+                size_hint: 1, None
+                height: 44
+                background_normal: ""
+                background_color: 0, 0, 0, 0
+                color: 0.55, 0.58, 0.65, 1
+                on_release: setattr(root.manager, 'current', 'vault')
+
+# ── Settings Screen ──────────────────────────────────────────────────────
+<SettingsScreen>:
+    ScrollView:
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 12
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            canvas.before:
+                Color:
+                    rgba: 0.05, 0.08, 0.15, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            HeaderLabel:
+                text: "\\u2699  Settings"
+
+            Label:
+                text: "Auto-lock timeout (seconds, 0=off)"
+                size_hint: 1, None
+                height: 20
+                font_size: 11
+            TextInput:
+                id: lock_timeout
+                text: "300"
+                input_filter: "int"
+                multiline: False
+                size_hint: 1, None
+                height: 40
+
+            Label:
+                text: "Clipboard clear timeout (seconds, 0=off)"
+                size_hint: 1, None
+                height: 20
+                font_size: 11
+            TextInput:
+                id: clipboard_timeout
+                text: "30"
+                input_filter: "int"
+                multiline: False
+                size_hint: 1, None
+                height: 40
+
+            Label:
+                text: "Max failed attempts before lockout"
+                size_hint: 1, None
+                height: 20
+                font_size: 11
+            TextInput:
+                id: max_attempts
+                text: "5"
+                input_filter: "int"
+                multiline: False
+                size_hint: 1, None
+                height: 40
+
+            Label:
+                text: "Lockout duration (seconds)"
+                size_hint: 1, None
+                height: 20
+                font_size: 11
+            TextInput:
+                id: lockout_duration
+                text: "600"
+                input_filter: "int"
+                multiline: False
+                size_hint: 1, None
+                height: 40
+
+            Widget:
+                size_hint: 1, None
+                height: 10
+
+            CustomButton:
+                text: "\\u2705  Save Settings"
+                on_release: root.save_settings()
+            CustomButton:
+                text: "\\U0001F4E4  Export Encrypted Backup"
+                on_release: root.export_vault()
+            Button:
+                text: "Back"
+                size_hint: 1, None
+                height: 44
+                background_normal: ""
+                background_color: 0, 0, 0, 0
+                color: 0.55, 0.58, 0.65, 1
+                on_release: setattr(root.manager, 'current', 'vault')
