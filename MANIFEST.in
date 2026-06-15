@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include requirements.txt
+include pyproject.toml
+include setup.cfg
+include setup.py
+
+recursive-include pwm *.py
+recursive-include docs *.md *.rst
