@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Secure random password generation."""
 
 import secrets

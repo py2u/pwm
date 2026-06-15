@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Cross-platform clipboard operations with auto-clear functionality."""
 
 import subprocess

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Vault lifecycle management for the PWM password manager.
 
 Maintains an in-memory session with the decrypted key material and account data.

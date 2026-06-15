@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """CLI argument parsing and command handlers for the PWM password manager."""
 
 import argparse
