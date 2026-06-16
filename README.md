@@ -1,5 +1,7 @@
 # PWM - Password Manager CLI
 
+[![codecov](https://codecov.io/gh/py2u/pwm/branch/master/graph/badge.svg)](https://codecov.io/gh/py2u/pwm)
+
 A secure local command-line password manager that stores your account credentials with AES-256-GCM encryption.
 
 ## Security Features
@@ -190,6 +192,12 @@ pwm config --set lockout_duration 1800
 2. Export backups regularly and store them in a safe location.
 3. Do not share your vault file with anyone.
 4. Remember your master password. PWM has no password recovery mechanism.
+
+## Coverage
+
+GitHub Actions generates `coverage.xml` on the Ubuntu/Python 3.12 test job and uploads it with `codecov/codecov-action@v5`.
+
+To enable uploads on GitHub, install the Codecov GitHub App for this repository and add the repository upload token as a GitHub Actions secret named `CODECOV_TOKEN`.
 
 ## Uninstall
 
