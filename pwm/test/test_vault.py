@@ -101,6 +101,16 @@ class TestAccountCRUD:
         assert updated.username == "new_user"
         assert updated.category == "test"
 
+    def test_rename_to_duplicate_service_fails(self, temp_vault):
+        """Renaming an account should not create duplicate service names."""
+        vault.add_account(Account(service="one.com", username="u1", password="p1"))
+        vault.add_account(Account(service="two.com", username="u2", password="p2"))
+
+        with pytest.raises(AccountDuplicateError):
+            vault.update_account("one.com", {"service": "TWO.com"})
+
+        assert [a.service for a in vault.get_accounts()] == ["one.com", "two.com"]
+
     def test_delete_account(self, temp_vault):
         """Should delete an account."""
         vault.add_account(Account(service="example.com", username="u", password="p"))
@@ -170,6 +180,31 @@ class TestImportExport:
         assert len(vault.get_accounts()) == 1
 
         os.remove(export_path)
+
+    def test_import_same_master_password_different_salt(self):
+        """Import should work when vaults share a master password but have different salts."""
+        source_path = os.path.join(tempfile.gettempdir(), f"pwm_src_{os.urandom(4).hex()}.json")
+        dest_path = os.path.join(tempfile.gettempdir(), f"pwm_dest_{os.urandom(4).hex()}.json")
+        export_path = source_path + ".backup"
+
+        try:
+            vault.init_vault("same_master", source_path)
+            vault.add_account(Account(service="example.com", username="u", password="p"))
+            vault.export_vault(export_path, source_path)
+            vault.lock_vault()
+
+            vault.init_vault("same_master", dest_path)
+            count = vault.import_vault(export_path, mode="merge", master_password="same_master")
+
+            assert count == 1
+            assert vault.find_account("example.com").username == "u"
+        finally:
+            vault.lock_vault()
+            for path in (source_path, dest_path, export_path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
 
 class TestConfig:

@@ -32,8 +32,8 @@ android.arch = arm64-v8a
 # Gradle dependencies (for AndroidX)
 android.gradle_dependencies = androidx.core:core:1.12.0
 
-# Java source for Android platform
-android.add_src = platform/android_java
+# Java source can be enabled here if native Android helpers are added later.
+# android.add_src =
 
 # Services — auto-start not needed for password manager
 # services = ...

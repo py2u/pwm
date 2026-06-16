@@ -135,6 +135,7 @@
 <AccountCard>:
     size_hint: 1, None
     height: 60
+    on_release: app.root.get_screen("vault").open_detail(root.index)
     canvas.before:
         Color:
             rgba: 0.10, 0.14, 0.22, 1

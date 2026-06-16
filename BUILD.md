@@ -51,7 +51,7 @@ Then open the Xcode project in `.kivy-ios/PWM/`.
 │              app/ (Kivy GUI)            │  ← Shared UI
 │   main.py, kv/pwm.kv, screens/         │
 ├─────────────────────────────────────────┤
-│           platform/ (Abstraction)       │  ← Per-platform
+│        pwm_platform/ (Abstraction)      │  ← Per-platform
 │   base.py, desktop.py, android.py      │
 ├─────────────────────────────────────────┤
 │           pwm/core (Logic)              │  ← Shared core

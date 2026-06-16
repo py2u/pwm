@@ -364,8 +364,9 @@ def cmd_import(args: argparse.Namespace) -> None:
     """Import an encrypted vault backup."""
     ensure_vault_unlocked(args.vault)
     mode = "replace" if args.replace else "merge"
+    import_password = prompt_master_password("Master password for imported vault: ")
     try:
-        count = vault.import_vault(args.path, mode=mode)
+        count = vault.import_vault(args.path, mode=mode, master_password=import_password)
         action = "Replaced all accounts with" if mode == "replace" else f"Imported {count} new account(s) from"
         print(f"{action}: {args.path}")
         vault.touch_activity()

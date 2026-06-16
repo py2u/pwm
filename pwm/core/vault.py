@@ -337,6 +337,13 @@ def update_account(service: str, updates: dict) -> Account:
     """
     ensure_unlocked()
     acc = find_account(service)
+    accounts = _session["plaintext_data"].accounts
+
+    new_service = updates.get("service")
+    if new_service is not None and new_service.lower() != acc.service.lower():
+        for existing in accounts:
+            if existing is not acc and existing.service.lower() == new_service.lower():
+                raise AccountDuplicateError(new_service)
 
     for field in ("service", "username", "password", "notes", "category"):
         if field in updates and updates[field] is not None:
@@ -401,18 +408,20 @@ def export_vault(export_path: str, vault_path: str | None = None) -> str:
     return export_path
 
 
-def import_vault(import_path: str, mode: str = "merge") -> int:
+def import_vault(import_path: str, mode: str = "merge", master_password: str | None = None) -> int:
     """Import accounts from an exported vault file.
 
     Args:
         import_path: Path to the exported vault file.
         mode: 'merge' (default) — add imported accounts, skip duplicates.
               'replace' — replace all current accounts with imported ones.
+        master_password: Master password for the imported vault. If omitted,
+              PWM falls back to the current session key for old same-file imports.
 
     Returns the number of imported accounts.
 
-    The vault must be unlocked. The imported vault must use the same master
-    password (i.e., be decryptable with the current session key).
+    The vault must be unlocked. Provide the imported vault's master password
+    when importing a backup from a vault with a different salt.
     """
     ensure_unlocked()
 
@@ -426,14 +435,33 @@ def import_vault(import_path: str, mode: str = "merge") -> int:
     except Exception as e:
         raise CryptoError(f"Failed to read import file: {e}") from e
 
-    # Decrypt with current session key (validates same master password)
+    candidate_keys: list[bytes] = []
+    if master_password is not None:
+        try:
+            imported_salt = decode_blob(imported_vault.salt)
+            candidate_keys.append(derive_key(master_password, imported_salt))
+        except Exception as e:
+            raise CryptoError(f"Failed to derive import key: {e}") from e
+
+    # Backward-compatible fallback for imports exported from the current vault.
     current_key = _session["key"]
+    if master_password is None:
+        candidate_keys.append(current_key)
+
+    imported_data = None
     try:
         encrypted_blob = decode_blob(imported_vault.encrypted_data)
-        plaintext_bytes = decrypt(current_key, encrypted_blob)
-        imported_data = PlaintextData.from_json(plaintext_bytes.decode("utf-8"))
+        for key in candidate_keys:
+            try:
+                plaintext_bytes = decrypt(key, encrypted_blob)
+                imported_data = PlaintextData.from_json(plaintext_bytes.decode("utf-8"))
+                break
+            except WrongPasswordError:
+                continue
+        if imported_data is None:
+            raise WrongPasswordError(0)
     except WrongPasswordError:
-        raise WrongPasswordError(0)  # generic message — the import was encrypted with a different key
+        raise
     except Exception as e:
         raise CryptoError(f"Failed to decrypt import: {e}") from e
 

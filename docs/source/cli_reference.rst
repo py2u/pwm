@@ -215,8 +215,9 @@ Options:
 
 .. warning::
 
-   Both vaults must use the **same master password**. The import decrypts
-   the backup with your current session key to validate compatibility.
+   Both vaults must use the **same master password**. PWM will prompt for
+   the imported backup's master password and derive a key from that backup's
+   own salt before merging or replacing accounts.
 
 ---
 

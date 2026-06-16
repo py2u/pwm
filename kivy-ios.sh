@@ -42,7 +42,7 @@ echo "Step 3/4: Copying app files..."
 cp "${PROJECT_DIR}/run_gui.py" "${BUILD_DIR}/${APP_NAME}/main.py"
 cp -r "${PROJECT_DIR}/app" "${BUILD_DIR}/${APP_NAME}/app"
 cp -r "${PROJECT_DIR}/pwm" "${BUILD_DIR}/${APP_NAME}/pwm"
-cp -r "${PROJECT_DIR}/platform" "${BUILD_DIR}/${APP_NAME}/platform"
+cp -r "${PROJECT_DIR}/pwm_platform" "${BUILD_DIR}/${APP_NAME}/pwm_platform"
 
 # Update Xcode project settings
 echo ""

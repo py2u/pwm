@@ -117,7 +117,8 @@ to your clipboard**. The clipboard is cleared after 30 seconds (configurable).
 .. warning::
 
    Import only works between vaults with the **same master password**.
-   The backup is encrypted — you must know the original master password to restore.
+   The backup is encrypted — PWM will prompt for the original master password
+   when restoring.
 
 9. Security Operations
 ----------------------

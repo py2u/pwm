@@ -11,7 +11,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from kivy.app import App
 from kivy.core.window import Window
-from kivy.properties import StringProperty, BooleanProperty, ObjectProperty, ListProperty
+from kivy.lang import Builder
+from kivy.properties import StringProperty, BooleanProperty, ObjectProperty, ListProperty, NumericProperty
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
@@ -47,6 +49,15 @@ COLORS = {
 }
 
 
+class AccountCard(ButtonBehavior, BoxLayout):
+    """RecycleView row for a stored account."""
+
+    index = NumericProperty(0)
+    service = StringProperty("")
+    username = StringProperty("")
+    category = StringProperty("")
+
+
 class PwmApp(App):
     """Main PWM application."""
 
@@ -56,6 +67,9 @@ class PwmApp(App):
         Window.clearcolor = COLORS["bg"]
         Window.minimum_width = 360
         Window.minimum_height = 600
+
+        kv_path = os.path.join(os.path.dirname(__file__), "kv", "pwm.kv")
+        Builder.load_file(kv_path)
 
         self.platform = P()
         self.auto_lock_event = None
@@ -208,7 +222,7 @@ class VaultScreen(Screen):
         self.apply_filter()
 
     def open_detail(self, account_index):
-        acc = self.filtered_accounts[account_index]
+        acc = self.filtered_accounts[int(account_index)]
         self.manager.get_screen("detail").account = acc
         self.manager.current = "detail"
 

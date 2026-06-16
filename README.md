@@ -135,7 +135,7 @@ pwm import backup.pwmbackup
 pwm import backup.pwmbackup --replace
 ```
 
-**注意**：导入时两个密码库必须使用相同的主密码。
+**注意**：导入时两个密码库必须使用相同的主密码，PWM 会要求你输入备份文件对应的主密码。
 
 ### 10. 安全操作
 

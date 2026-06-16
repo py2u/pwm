@@ -5,6 +5,10 @@ include requirements.txt
 include pyproject.toml
 include setup.cfg
 include setup.py
+include run_gui.py
 
 recursive-include pwm *.py
-recursive-include docs *.md *.rst
+prune pwm/test
+recursive-include pwm_platform *.py
+recursive-include app *.py *.kv
+recursive-include docs *.md *.rst *.py *.css *.svg

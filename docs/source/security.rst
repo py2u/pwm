@@ -143,9 +143,11 @@ Backup Security
 Importing a backup requires the **same master password** as the exported
 vault. The import process:
 
-1. Decrypts the imported vault with your current session key
-2. If decryption fails → the backup was created with a different password
-3. If decryption succeeds → merges or replaces accounts
+1. Prompts for the imported vault's master password
+2. Derives a key from the imported vault's own salt
+3. Decrypts the imported vault with that derived key
+4. If decryption fails → the backup was created with a different password
+5. If decryption succeeds → merges or replaces accounts
 
 Best Practices
 --------------
